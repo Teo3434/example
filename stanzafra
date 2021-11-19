@@ -1,0 +1,233 @@
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+#define N 10
+  
+typedef struct {
+    char nome[16];
+    double larghezza;
+    double lunghezza;
+    double area;
+    int ostacoli;
+    int priorita;
+} stanza;
+
+stanza stanze[N];
+
+
+void robConnect() {
+    printf("Loading...\n----------\r");
+    int load = 0;
+    srand(time(NULL));
+    while (load < 10) {
+        int randN = rand() % 10;
+        if (randN % 2 == 0) {
+            printf("=");
+            load++;
+        _sleep(1000);
+        }
+    }
+
+    system("@cls||clear");
+}
+
+stanza aggiungiStanza(int i) {
+    system("@cls||clear");
+    stanza* inserimento;
+    inserimento = (stanza*)malloc(sizeof(stanza)); //alloco spazio per la stanza e prendo gli input
+
+
+    int errore = 0;
+
+    //se è la prima stanza non controllo se è già presente un'altra stanza con lo stesso nome
+    if (i > 0) {
+        do {
+            //controllo stesso nome
+            errore = 0;
+            printf("Inserire il nome della stanza n. %d: ", i + 1);
+            scanf("%15s", inserimento->nome);
+
+            for (int j = 0; j < i; j++) {
+
+                if (strcmp(stanze[j].nome, inserimento->nome) == 0) {
+                    errore = 1;
+                    printf("\nNome stanza già presente, cambia nome\n");
+                }
+                else {
+                    if (errore != 1)
+                        errore = 0;
+                }
+            }
+
+        } while (errore == 1);
+    }
+    else {
+        printf("Inserire il nome della stanza n. %d: ", i + 1);
+        scanf("%15s", inserimento->nome);
+    }
+
+
+    //prendo gli altri input
+    printf("Stanza %s aggiunta\n", inserimento->nome);
+    fflush(stdin);
+    printf("Inserire la larghezza della stanza %s: ", inserimento->nome);
+    scanf("%lf", &inserimento->larghezza);
+    printf("Inserire la lunghezza della stanza %s: ", inserimento->nome);
+    scanf("%lf", &inserimento->lunghezza);
+    printf("L'area della stanza %s è %.4lf\n", inserimento->nome, inserimento->lunghezza * inserimento->larghezza);
+    inserimento->area = inserimento->lunghezza * inserimento->larghezza;
+    printf("Inserire il numero di ostacoli presenti nella stanza %s: ", inserimento->nome);
+    scanf("%d", &inserimento->ostacoli);
+    do {
+        printf("Inserire la priorità di pulizia (1-5, dove 5 è la priorità massima) della stanza %s: ", inserimento->nome);
+        scanf("%d", &inserimento->priorita);
+    } while (inserimento->priorita < 1 || inserimento->priorita>5);
+    system("@cls||clear");
+
+    return *inserimento; //returno il puntatore
+}
+
+
+
+int mostraInfoStanza() {
+
+    system("@cls||clear");
+
+    //chiedo il nome
+    printf("Inserire il nome della stanza: ");
+    char risposta[16];
+    scanf("%15s", risposta);
+
+    //ricerco nel vettore
+    int trovato = 0;
+    for (int i = 0; i < N && trovato == 0; i++) {
+        if (strcmp(stanze[i].nome, risposta) == 0) {
+            trovato = 1;
+            printf("\nDati trovati: \nNome stanza: \t\t%s\nLunghezza e Larghezza: \t%.4lf %.4lf\nArea: \t\t\t%lf\nNumero ostacoli: \t%d\nPriorità: \t\t%d\n", stanze[i].nome, stanze[i].lunghezza, stanze[i].larghezza, stanze[i].area, stanze[i].ostacoli, stanze[i].priorita);
+            return i;
+        }
+    }
+    if (trovato == 0)
+        printf("\nNessuna stanza trovata con questo nome\n");
+    return 1000;
+}
+
+void modificaStanza() {
+    int i = mostraInfoStanza();
+    char nome[16];
+    int errore = 0;
+    do {
+        //controllo stesso nome
+        errore = 0;
+        printf("Inserire il nome della stanza n. %d: ", i + 1);
+
+        scanf("%15s", nome);
+
+        for (int j = 0; j < N; j++) {
+
+            if (strcmp(stanze[j].nome, nome) == 0 && j != i) { // && j!=i mi permette di poter riassegnare lo stesso nome alla stanza
+                errore = 1;
+                printf("\nNome stanza già presente, cambia nome\n");
+            }
+            else {
+                if (errore != 1)
+                    errore = 0;
+            }
+        }
+
+    } while (errore == 1);
+
+    strcpy(stanze[i].nome, nome);
+
+    //prendo gli altri input
+    printf("Stanza %s aggiunta\n", stanze[i].nome);
+    fflush(stdin);
+    printf("Inserire la larghezza della stanza %s: ", stanze[i].nome);
+    scanf("%lf", &stanze[i].larghezza);
+    printf("Inserire la lunghezza della stanza %s: ", stanze[i].nome);
+    scanf("%lf", &stanze[i].lunghezza);
+    printf("L'area della stanza %s è %.4lf\n", stanze[i].nome, stanze[i].lunghezza * stanze[i].larghezza);
+    stanze[i].area = stanze[i].lunghezza * stanze[i].larghezza;
+    printf("Inserire il numero di ostacoli presenti nella stanza %s: ", stanze[i].nome);
+    scanf("%d", &stanze[i].ostacoli);
+    do {
+        printf("Inserire la priorità di pulizia (1-5, dove 5 è la priorità massima) della stanza %s: ", stanze[i].nome);
+        scanf("%d", &stanze[i].priorita);
+    } while (stanze[i].priorita < 1 || stanze[i].priorita>5);
+    system("@cls||clear");
+
+
+}
+
+void calcolaPercorso(int i) {
+    system("@cls||clear");
+    for (int k = 5; k > 0; k--) {
+        printf("Stanze di priorità %d:\n", k);
+        for (int j = 0; j < i; j++) {
+            if (stanze[j].priorita == k) {
+                printf("-%s\n", stanze[j].nome);
+            }
+        }
+        printf("\n");
+    }
+
+}
+
+
+void robDisconnect() {
+    system("@cls||clear");
+    printf("Disconnessione effettuata");
+}
+
+
+int main()
+{
+
+    robConnect();
+
+    int i = 0;
+    int stop = 0;
+
+    while (!stop) {
+        int scelta = 0;
+        do {
+            printf("Cosa vuoi fare? \n1. Aggiungi stanza\n2. Mostra info di una stanza\n3. Modifica info di una stanza\n4. Calcola percorso di pulizia\n5. Disconnetti\n\n");
+            scanf("%d", &scelta);
+        } while (scelta < 1 || scelta>5);
+
+        switch (scelta) {
+        case 1:
+            //Aggiungo la stanza con relative info
+            if (i < N) {
+                stanze[i] = aggiungiStanza(i);
+                i++;
+            }
+            else {
+                //ho già inserito tutte le stanze, mostro un errore
+                printf("\nRaggiunto il numero massimo di stanze\n");
+            }
+            break;
+
+        case 2:
+            mostraInfoStanza();
+            break;
+
+        case 3:
+            modificaStanza();
+            break;
+
+        case 4:
+            calcolaPercorso(i);
+            break;
+
+        case 5:
+            robDisconnect();
+            stop = 1;
+            break;
+        }
+
+    }
+
+    return 0;
+    }
